@@ -1,0 +1,73 @@
+POST http://localhost:8080/api/payments/webhook
+Content-Type: application/json
+
+{
+  "type": "SUBSCRIPTION_PURCHASE_SUCCESSFUL",
+  "data": {
+    "customerEmail": "john@example.com",
+    "subscriptionId": "sub_123456789",
+    "paymentMethodId": 1
+  }
+}
+
+###
+POST http://localhost:8080/api/payments/webhook
+Content-Type: application/json
+
+{
+  "type": "SUBSCRIPTION_RENEWAL_SUCCESSFUL",
+  "data": {
+    "customerEmail": "john@example.com",
+    "subscriptionId": "sub_123456789"
+  }
+}
+
+###
+POST http://localhost:8080/api/payments/webhook
+Content-Type: application/json
+
+{
+  "type": "SUBSCRIPTION_RENEWAL_FAILED",
+  "data": {
+    "customerEmail": "john@example.com",
+    "subscriptionId": "sub_123456789"
+  }
+}
+
+###
+POST http://localhost:8080/api/payments/webhook
+Content-Type: application/json
+
+{
+  "type": "SUBSCRIPTION_CANCELED",
+  "data": {
+    "customerEmail": "john@example.com",
+    "subscriptionId": "sub_123456789"
+  }
+}
+
+###
+POST http://localhost:8080/api/payments/webhook
+Content-Type: application/json
+
+{
+  "type": "SUBSCRIPTION_EXPIRED",
+  "data": {
+    "customerEmail": "john@example.com",
+    "subscriptionId": "sub_123456789"
+  }
+}
+
+###
+POST http://localhost:8080/api/payments/webhook
+Content-Type: application/json
+
+{
+  "type": "SUBSCRIPTION_CREATED",
+  "data": {
+    "customerEmail": "john@example.com",
+    "subscriptionId": "sub_123456789",
+    "amount": 9.99,
+    "billingPeriod": "MONTHLY"
+  }
+}

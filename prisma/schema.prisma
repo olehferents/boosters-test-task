@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  email            String             @unique
+  name             String
+  password         String
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  UserSubscription UserSubscription[]
+  PaymentsHistory  PaymentsHistory[]
+  PaymentsMethod   PaymentsMethod[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model UserSubscription {
+  id              Int                    @id @default(autoincrement())
+  user            User                   @relation(fields: [userId], references: [id])
+  userId          Int                    @map("user_id")
+  subscription    Subscription           @relation(fields: [subscriptionId], references: [id])
+  subscriptionId  Int                    @map("subscription_id")
+  status          UserSubscriptionStatus
+  paymentMethod   PaymentsMethod         @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId Int                    @map("payment_method_id")
+  endAt           DateTime               @map("end_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  @@index([userId, subscriptionId])
+  @@map("user_subscriptions")
+}
+
+enum UserSubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+model Subscription {
+  id               Int                @id @default(autoincrement())
+  name             String
+  amount           Decimal            @db.Decimal(10, 2)
+  billingPeriod    BillingPeriod      @map("billing_period")
+  thirdPartyId     String             @unique @map("third_party_id")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  UserSubscription UserSubscription[]
+  PaymentsHistory  PaymentsHistory[]
+
+  @@map("subscriptions")
+}
+
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+}
+
+model PaymentsMethod {
+  id               Int                @id @default(autoincrement())
+  user             User               @relation(fields: [userId], references: [id])
+  userId           Int                @map("user_id")
+  type             String
+  cardNumber       String             @map("card_number")
+  expirationDate   DateTime           @map("expiration_date")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  UserSubscription UserSubscription[]
+
+  @@index([userId])
+  @@map("payments_methods")
+}
+
+model PaymentsHistory {
+  id             Int                     @id @default(autoincrement())
+  user           User                    @relation(fields: [userId], references: [id])
+  userId         Int                     @map("user_id")
+  subscription   Subscription            @relation(fields: [subscriptionId], references: [id]) @ignore
+  subscriptionId Int                     @map("subscription_id")
+  amount         Decimal                 @db.Decimal(10, 2)
+  currency       String
+  paymentDate    DateTime                @map("payment_date")
+  oldStatus      UserSubscriptionStatus? @map("old_status")
+  newStatus      UserSubscriptionStatus? @map("new_status")
+  createdAt      DateTime                @default(now()) @map("created_at")
+  updatedAt      DateTime                @updatedAt @map("updated_at")
+
+  @@index([userId, subscriptionId])
+  @@map("payments_history")
+}
