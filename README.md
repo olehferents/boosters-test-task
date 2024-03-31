@@ -35,3 +35,6 @@ $ pnpm seed
 ## Documentation
 ### Swagger
 http://localhost:8080/docs
+
+### HTTP requests examples
+#### ```payments_webhook.http``` file in root of project
