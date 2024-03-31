@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { DatabaseService } from '../database/database.service';
-import { UsersService } from '../users/users.service';
-import { WebhookEventDto } from './dtos/webhook-event.dto';
-import { WebhookType } from './enums/webhook-type.enum';
-import { BillingPeriod } from './enums/billing-period.enum';
-import { SubscriptionStatus } from './enums/subscription-status.enum';
+import { DatabaseService } from '../../database/database.service';
+import { UsersService } from '../../users/users.service';
+import { WebhookEventDto } from '../dtos/webhook-event.dto';
+import { WebhookType } from '../enums/webhook-type.enum';
+import { BillingPeriod } from '../enums/billing-period.enum';
+import { SubscriptionStatus } from '../enums/subscription-status.enum';
+import { SubscriptionsService } from './subscription.service';
 
 @Injectable()
 export class PaymentsService {
@@ -14,6 +15,7 @@ export class PaymentsService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly usersService: UsersService,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
 
   async handleWebhook(webhookPayload: WebhookEventDto) {
@@ -34,7 +36,14 @@ export class PaymentsService {
 
     switch (type) {
       case WebhookType.SUBSCRIPTION_CREATED:
-        await this.createSubscription(subscriptionId, amount, billingPeriod);
+        await this.subscriptionsService.createSubscription(
+          subscriptionId,
+          amount,
+          billingPeriod,
+        );
+        break;
+      case WebhookType.SUBSCRIPTION_DELETED:
+        await this.subscriptionsService.deleteSubscription(subscriptionId);
         break;
       case WebhookType.SUBSCRIPTION_PURCHASE_SUCCESSFUL:
         await this.purchaseSubscription(user, subscriptionId, paymentMethodId);
@@ -51,29 +60,9 @@ export class PaymentsService {
       case WebhookType.SUBSCRIPTION_EXPIRED:
         await this.expireSubscription(user, subscriptionId);
         break;
-      case WebhookType.SUBSCRIPTION_DELETED:
-        await this.deleteSubscription(subscriptionId);
-        break;
       default:
         this.logger.warn(`Unhandled webhook event type: ${type}`);
     }
-  }
-
-  private async createSubscription(
-    subscriptionId: string,
-    amount: number,
-    billingPeriod: string,
-  ) {
-    await this.databaseService.subscription.create({
-      data: {
-        name: `${billingPeriod} Subscription`,
-        thirdPartyId: subscriptionId,
-        amount: amount,
-        billingPeriod: billingPeriod.toUpperCase() as BillingPeriod,
-      },
-    });
-
-    this.logger.log(`Created subscription ${subscriptionId}`);
   }
 
   private async purchaseSubscription(
@@ -269,23 +258,6 @@ export class PaymentsService {
         newStatus: SubscriptionStatus.EXPIRED,
       },
     });
-  }
-
-  private async deleteSubscription(subscriptionId: string) {
-    const subscription = await this.getSubscription(subscriptionId);
-
-    if (!subscription) {
-      this.logger.error(`Subscription ${subscriptionId} not found`);
-      return;
-    }
-
-    await this.databaseService.subscription.delete({
-      where: {
-        id: subscription.id,
-      },
-    });
-
-    this.logger.log(`Deleted subscription ${subscriptionId}`);
   }
 
   private async getSubscription(subscriptionId: string) {
