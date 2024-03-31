@@ -16,9 +16,6 @@ $ pnpm run start:dev
 
 # production mode
 $ pnpm run start:prod
-
-# docker
-$ docker-compose up -d
 ```
 
 ## Database commands
