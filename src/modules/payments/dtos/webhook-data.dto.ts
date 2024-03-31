@@ -1,4 +1,4 @@
-import { BillingPeriod } from '../enum/billing-period.enum';
+import { BillingPeriod } from '../enums/billing-period.enum';
 
 export class WebhookDataDto {
   customerEmail: string;

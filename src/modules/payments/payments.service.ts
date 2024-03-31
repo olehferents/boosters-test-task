@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 import { UsersService } from '../users/users.service';
-import { WebhookEventDto } from './dto/webhook-event.dto';
-import { WebhookType } from './enum/webhook-type.enum';
-import { BillingPeriod } from './enum/billing-period.enum';
-import { SubscriptionStatus } from './enum/subscription-status.enum';
+import { WebhookEventDto } from './dtos/webhook-event.dto';
+import { WebhookType } from './enums/webhook-type.enum';
+import { BillingPeriod } from './enums/billing-period.enum';
+import { SubscriptionStatus } from './enums/subscription-status.enum';
 
 @Injectable()
 export class PaymentsService {
