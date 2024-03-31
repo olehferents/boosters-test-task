@@ -42,7 +42,7 @@ export class SubscriptionsService {
     this.logger.log(`Deleted subscription ${subscriptionId}`);
   }
 
-  private async getSubscription(subscriptionId: string) {
+  async getSubscription(subscriptionId: string) {
     return this.databaseService.subscription.findUnique({
       where: {
         thirdPartyId: subscriptionId,
